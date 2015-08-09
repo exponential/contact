@@ -1,0 +1,66 @@
+#!/bin/bash
+
+##########################################################
+#                                                        #
+#  Video Contact Sheet Creator (contact)                 #
+#                                                        #
+#  If you don't know what the purpose of this tool is    #
+#  then you fail. No no no, you fail all of the game.    #
+#                                                        #
+#  By: Marcus White (samdiggly@gmail.com) 2015           #
+#                                                        #
+##########################################################
+
+
+for ARG in "$@"
+do
+	FILE="$ARG"
+    NEWFILE=$(echo "$FILE" | sed 's/\.[^\.]*$//')
+    NEWFILE="$NEWFILE.montage"
+
+    ffmpeg -i "$FILE" -ss 00:01:00 -vf fps=1/60,scale=-1:120,drawtext="fontfile=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf:text='%{pts \\: hms}': fontcolor=white@0.6:x=(main_w-(text_w+10)):y=main_h-(text_h*2):" -vcodec png capture-%003d.png
+
+    montage -title "\n\n\n\n\n" -tile 5x -border 2 -bordercolor '#000000' -background '#cfcfcf' -geometry +4+4 -shadow capture*.png output-1.jpg
+
+    convert output-1.jpg -gravity NorthEast -font "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf" -fill "#ffffffaa" -pointsize 144 -annotate +0+0 'ffmpeg' output-2.jpg
+
+    rm -rf output-1.jpg
+
+    ffmpeg -framerate 1/1 -i capture-%03d.png -loop 0 $NEWFILE.gif
+    ffmpeg -framerate 1/1 -i capture-%03d.png -c:v libvpx -vf fps=25,scale=-1:180 $NEWFILE.webm
+    // this is better
+    //  ffmpeg -r 720 -i "$FILE" -an -c:v libvpx -vf fps=24,scale=-1:180 $NEWFILE.FF.webm
+
+    rm -rf capture*.png
+
+    ffprobe -v quiet -print_format flat -show_streams "$FILE" > "intel.txt"
+    BASE=$(ls -al "$FILE" | awk '{print $5}')
+    declare -A SIZEP
+    SIZEP[0]='b'
+    SIZEP[1]='kb'
+    SIZEP[2]='MB'
+    SIZEP[3]='GB'
+    SIZEP[4]='TB'
+    SIZEP[5]='PB'
+    COUNT=0
+    SIZE=$BASE
+    SIZE=$(($SIZE+0))
+    while [ $SIZE -gt 1024 ]
+    do
+        SIZE=$(($SIZE/1024))
+        COUNT=$(($COUNT+1))
+    done
+
+    VIDEO=$(grep "streams\.stream\.0\.codec\_long\_name" intel.txt)
+    AUDIO=$(grep "streams\.stream\.1\.codec\_long\_name" intel.txt)
+    rm -rf intel.txt
+
+    VIDEO=$(echo $VIDEO | sed 's/.*\=//')
+    AUDIO=$(echo $AUDIO | sed 's/.*\=//')
+    VIDEO=$(echo $VIDEO | sed 's/\"//g')
+    AUDIO=$(echo $AUDIO | sed 's/\"//g')
+
+    convert output-2.jpg -gravity NorthWest -pointsize 20 -annotate +0+0 "File: ${FILE}\nSIZE: ${BASE} (${SIZE} ${SIZEP[$COUNT]})\nVIDEO: ${VIDEO}\nAUDIO: ${AUDIO}" $NEWFILE.jpg
+
+    rm -rf output-2.jpg
+done
