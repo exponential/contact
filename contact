@@ -11,10 +11,17 @@
 #                                                        #
 ##########################################################
 
+declare -A SIZEP
+SIZEP[0]='b'
+SIZEP[1]='kb'
+SIZEP[2]='MB'
+SIZEP[3]='GB'
+SIZEP[4]='TB'
+SIZEP[5]='PB'
 
 for ARG in "$@"
 do
-	FILE="$ARG"
+    FILE="$ARG"
     NEWFILE=$(echo "$FILE" | sed 's/\.[^\.]*$//')
     NEWFILE="$NEWFILE.montage"
 
@@ -29,19 +36,13 @@ do
     ffmpeg -framerate 1/1 -i capture-%03d.png -loop 0 $NEWFILE.gif
     ffmpeg -framerate 1/1 -i capture-%03d.png -c:v libvpx -vf fps=25,scale=-1:180 $NEWFILE.webm
     // this is better
-    //  ffmpeg -r 720 -i "$FILE" -an -c:v libvpx -vf fps=24,scale=-1:180 $NEWFILE.FF.webm
+    // ffmpeg -r 720 -i "$FILE" -an -c:v libvpx -vf fps=25,scale=-1:180 $NEWFILE.FF.webm
 
     rm -rf capture*.png
 
     ffprobe -v quiet -print_format flat -show_streams "$FILE" > "intel.txt"
     BASE=$(ls -al "$FILE" | awk '{print $5}')
-    declare -A SIZEP
-    SIZEP[0]='b'
-    SIZEP[1]='kb'
-    SIZEP[2]='MB'
-    SIZEP[3]='GB'
-    SIZEP[4]='TB'
-    SIZEP[5]='PB'
+    
     COUNT=0
     SIZE=$BASE
     SIZE=$(($SIZE+0))
