@@ -33,10 +33,9 @@ do
 
     rm -rf output-1.jpg
 
-    ffmpeg -framerate 1/1 -i capture-%03d.png -loop 0 $NEWFILE.gif
-    ffmpeg -framerate 1/1 -i capture-%03d.png -c:v libvpx -vf fps=25,scale=-1:180 $NEWFILE.webm
-    // this is better
-    // ffmpeg -r 720 -i "$FILE" -an -c:v libvpx -vf fps=25,scale=-1:180 $NEWFILE.FF.webm
+    ffmpeg -framerate 1/1 -i capture-%03d.png -loop 0 "$NEWFILE.gif"
+    ffmpeg -framerate 1/1 -i capture-%03d.png -c:v libvpx -vf fps=25,scale=-1:180 "$NEWFILE.webm"
+    ffmpeg -r 720 -i "$FILE" -an -c:v libvpx -vf fps=25,scale=-1:180 "$NEWFILE.FF.webm"
 
     rm -rf capture*.png
 
@@ -61,7 +60,7 @@ do
     VIDEO=$(echo $VIDEO | sed 's/\"//g')
     AUDIO=$(echo $AUDIO | sed 's/\"//g')
 
-    convert output-2.jpg -gravity NorthWest -pointsize 20 -annotate +0+0 "File: ${FILE}\nSIZE: ${BASE} (${SIZE} ${SIZEP[$COUNT]})\nVIDEO: ${VIDEO}\nAUDIO: ${AUDIO}" $NEWFILE.jpg
+    convert output-2.jpg -gravity NorthWest -pointsize 20 -annotate +0+0 "File: ${FILE}\nSIZE: ${BASE} (${SIZE} ${SIZEP[$COUNT]})\nVIDEO: ${VIDEO}\nAUDIO: ${AUDIO}" "$NEWFILE.jpg"
 
     rm -rf output-2.jpg
 done
