@@ -34,8 +34,8 @@ do
     rm -rf output-1.jpg
 
     ffmpeg -framerate 1/1 -i capture-%03d.png -loop 0 "$NEWFILE.gif"
-    ffmpeg -framerate 1/1 -i capture-%03d.png -c:v libvpx -vf fps=25,scale=-1:180 "$NEWFILE.webm"
-    ffmpeg -r 720 -i "$FILE" -an -c:v libvpx -vf fps=25,scale=-1:180 "$NEWFILE.FF.webm"
+    ffmpeg -framerate 1/1 -i capture-%03d.png -c:v libvpx-vp9 -vf fps=25,scale=-1:180 "$NEWFILE.webm"
+    ffmpeg -r 720 -i "$FILE" -an -c:v libvpx-vp9 -vf fps=25,scale=-1:180 "$NEWFILE.FF.webm"
 
     rm -rf capture*.png
 
